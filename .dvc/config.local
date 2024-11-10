@@ -1,1 +1,6 @@
-
+['remote "gdrive"']
+    gdrive_service_account_json_file_path = ../credentials.json
+    gdrive_user_credentials_file = /workspaces/catdog_class/clientcred.json
+    profile = myprofile
+['remote "myremote"']
+    gdrive_service_account_json_file_path = ../credentials.json
