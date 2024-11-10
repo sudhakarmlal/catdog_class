@@ -1,0 +1,92 @@
+name: Train and Report
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  train-and-report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: iterative/setup-cml@v2
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        env:
+          UV_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu
+        run: |
+          uv sync
+
+      - name: Update DVC and dependencies
+        run: |
+          uv run pip install --upgrade dvc dvc-gdrive
+
+      - name: Pull data from DVC
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          uv run pip install backoff
+          python - <<EOF
+          import backoff
+          import subprocess
+          import sys
+
+          @backoff.on_exception(backoff.expo, subprocess.CalledProcessError, max_tries=5)
+          def run_dvc_pull():
+              subprocess.run(["uv", "run", "dvc", "pull", "-v"], check=True)
+
+          try:
+              run_dvc_pull()
+          except subprocess.CalledProcessError:
+              print("DVC pull failed after multiple retries")
+              sys.exit(1)
+          EOF
+
+      - name: Train model
+        run: |
+          uv run dvc repro
+
+      - name: Generate plots and metrics
+        run: |
+          uv run python scripts/generate_plots.py
+
+      - name: Run inference
+        run: |
+          uv run python src/infer.py 
+          
+      - name: Create CML report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Model Training Results" >> report.md
+          
+          echo "### Training and Validation Metrics" >> report.md
+          echo "![Accuracy](./accuracy_plot.png)" >> report.md
+          echo "![Loss](./loss_plot.png)" >> report.md
+          
+          echo "### Confusion Matrices" >> report.md
+          echo "#### Train Dataset" >> report.md
+          echo "![Train Confusion Matrix](./train_confusion_matrix.png)" >> report.md
+          echo "#### Test Dataset" >> report.md
+          echo "![Test Confusion Matrix](./test_confusion_matrix.png)" >> report.md
+          
+          echo "### Test Metrics" >> report.md
+          cat test_metrics.md >> report.md
+          
+          echo "### Sample Predictions" >> report.md
+          for img in predictions/*.png; do
+            echo "![Prediction](${img})" >> report.md
+          done
+          
+          cml comment create report.md
