@@ -1,0 +1,12 @@
+#Note you can also directly use "GDRIVE_CREDENTIALS_DATA" as env variable and pull it
+- name: Create credentials.json
+env:
+GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+run: |
+echo $GDRIVE_CREDENTIALS_DATA > credentials_1.json
+- name: Modify DVC Remote
+run: |
+uv run dvc remote modify - local myremote gdrive_service_account_json_file_path credentials_1.json
+- name: DVC Pull Data
+run: |
+uv run dvc pull -v
