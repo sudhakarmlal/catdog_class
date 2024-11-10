@@ -1,6 +1,16 @@
+[core]
+    autostage = true
+    remote = myremote
 ['remote "gdrive"']
-    gdrive_service_account_json_file_path = ../credentials.json
-    gdrive_user_credentials_file = /workspaces/catdog_class/clientcred.json
+    url = gdrive://1ImXR-fsG3mqQo_IX4Bp-YIsJzszTgQym
+    gdrive_client_id = 831223798088-0kdbbn4gdg9pj2abua72lsj54sjdide3.apps.googleusercontent.com
+    gdrive_client_secret = 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
+    gdrive_use_service_account = true
+    gdrive_service_account_user_email = sudhakardlal10@gmail.com
+    gdrive_acknowledge_abuse = true
+    gdrive_trash_only = true
     profile = myprofile
 ['remote "myremote"']
-    gdrive_service_account_json_file_path = ../credentials.json
+    url = gdrive://1ImXR-fsG3mqQo_IX4Bp-YIsJzszTgQym
+    gdrive_use_service_account = true
+    gdrive_acknowledge_abuse = true
