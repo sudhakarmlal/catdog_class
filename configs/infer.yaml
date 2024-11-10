@@ -1,0 +1,20 @@
+defaults:
+  - _self_
+  - data: catdog
+  - model: timm_classify
+  - paths: default
+  - trainer: default
+  - hydra: default
+
+ckpt_path: ${paths.root_dir}/checkpoints/best_model.ckpt
+num_samples: 10
+output_folder: ${paths.root_dir}/predictions
+task_name: "infer"
+
+hydra:
+  run:
+    dir: ${paths.log_dir}/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${paths.log_dir}/multiruns/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  job:
+    chdir: True
