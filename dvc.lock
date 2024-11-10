@@ -1,0 +1,24 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: python src/train.py experiment=catdog_ex +trainer.log_every_n_steps=5
+    deps:
+    - path: configs/experiment/catdog_ex.yaml
+      hash: md5
+      md5: e57b4f1549208b1580afa2fdba3bf3e0
+      size: 768
+    - path: data/catdog
+      hash: md5
+      md5: 174fe7fcb400140a007ac05c36b5bfd4.dir
+      size: 68556316
+      nfiles: 3001
+    - path: src/train.py
+      hash: md5
+      md5: 889fe69a5df01263c858dab1727baebd
+      size: 3495
+    outs:
+    - path: logs
+      hash: md5
+      md5: eb7055c38dfcc6ae4ea1376b284e8720.dir
+      size: 268540950
+      nfiles: 12
